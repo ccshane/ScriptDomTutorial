@@ -1,0 +1,66 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
+
+namespace ScriptDomBlogSample
+{
+    public class SqlStatementsParser
+    {
+        private TSqlParser _parser;
+        private IList<ParseError> _errors;
+
+        public DataContainer Parse(string text)
+        {
+            var container = new DataContainer();
+            //begin the parser code
+            _parser = new TSql100Parser(false);
+            var reader = new StringReader(text);
+            var statements = _parser.ParseStatementList(reader, out _errors);
+            if (_errors.Count > 0)
+            {
+                container.AddErrors(_errors);
+                return container;
+            }
+            foreach (var statement in statements.Statements)
+            {
+                if (statement is SelectStatement)
+                {
+                    var select = statement as SelectStatement;
+                    var querySpec = select.QueryExpression as QuerySpecification;
+                    var columns = querySpec.SelectElements;
+                    foreach (var column in columns)
+                    {
+                        if (column is SelectScalarExpression)
+                        {
+                            var expression = (column as SelectScalarExpression).Expression;
+                            if (expression is ColumnReferenceExpression)
+                            {
+                                var columnExpression = expression as ColumnReferenceExpression;
+                                var identifier = columnExpression.MultiPartIdentifier;
+                                if (identifier.Identifiers.Count == 1)
+                                {
+                                    var columnName = identifier.Identifiers.First().Value;
+                                    container.AddColumn(columnName);
+                                }
+                            }
+                        }
+                    }
+                    var tables = querySpec.FromClause.TableReferences;
+                    foreach (var table in tables)
+                    {
+                        if (table is NamedTableReference)
+                        {
+                            var reference = table as NamedTableReference;
+                            var tableName = reference.SchemaObject.BaseIdentifier.Value;
+                            container.AddTable(tableName);
+                        }
+                    }
+                }
+            }
+            //end parser code
+            return container;
+        }
+
+    }
+}
