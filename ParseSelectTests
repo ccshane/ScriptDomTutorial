@@ -1,0 +1,36 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ScriptDomBlogSample;
+
+namespace ScriptDomTests
+{
+    [TestClass]
+    public class ParseSelectTests
+    {
+        private SqlStatementsParser _parser;
+
+        [TestInitialize]
+        public void SetUp()
+        {
+            _parser = new SqlStatementsParser();
+        }
+
+        [TestCleanup]
+        public void TearDown()
+        {
+            _parser = null;
+        }
+
+        [TestMethod]
+        public void ParsingHelloWorldExampleGetsHelloColumnFromWorldTable()
+        {
+            var sql = "select hello from world";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            var columns = result.GetColumns();
+            Assert.AreEqual(1,columns.Count,"Column counts don't match");
+            Assert.AreEqual("world",columns[0],"Column name does not match");
+            Assert.AreEqual(1,tables.Count,"Table counts don't match");
+            Assert.AreEqual("world",tables[0],"Table name does not match");
+        }
+    }
+}
