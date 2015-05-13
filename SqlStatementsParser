@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,6 +29,23 @@ namespace ScriptDomBlogSample
                 {
                     var select = statement as SelectStatement;
                     var querySpec = select.QueryExpression as QuerySpecification;
+                    if (querySpec == null)
+                    {
+                        //nothing to do
+                        continue;
+                    }
+                    //check for distinct
+                    container.IsDistinctSelection = querySpec.UniqueRowFilter.ToString().ToUpper().Equals("DISTINCT");
+                    if (querySpec.TopRowFilter != null)
+                    {
+                        //check for top
+                        container.IsTopSelection = true;
+                        container.IsTopPercent = querySpec.TopRowFilter.Percent;
+                        if (querySpec.TopRowFilter.Expression is IntegerLiteral)
+                        {
+                            container.TopCount = Int32.Parse((querySpec.TopRowFilter.Expression as IntegerLiteral).Value);
+                        }
+                    }
                     var columns = querySpec.SelectElements;
                     foreach (var column in columns)
                     {
@@ -64,3 +82,4 @@ namespace ScriptDomBlogSample
 
     }
 }
+
