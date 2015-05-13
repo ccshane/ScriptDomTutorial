@@ -27,10 +27,153 @@ namespace ScriptDomTests
             var result = _parser.Parse(sql);
             var tables = result.GetTables();
             var columns = result.GetColumns();
-            Assert.AreEqual(1,columns.Count,"Column counts don't match");
-            Assert.AreEqual("world",columns[0],"Column name does not match");
-            Assert.AreEqual(1,tables.Count,"Table counts don't match");
-            Assert.AreEqual("world",tables[0],"Table name does not match");
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("hello", columns[0], "Column name does not match");
+            Assert.AreEqual(1, tables.Count, "Table counts don't match");
+            Assert.AreEqual("world", tables[0], "Table name does not match");
+        }
+
+        [TestMethod]
+        public void ParsingSelectWithOneColumnAndOneTableReturnsCorrectObject()
+        {
+            const string sql = "SELECT column_name FROM table_name";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column_name", columns[0], "Column name does not match");
+            Assert.AreEqual(1, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table_name", tables[0], "Table name does not match");
+        }
+
+        [TestMethod]
+        public void ParsingSelectStarWithOneTableReturnsCorrectObject()
+        {
+            const string sql = "SELECT * FROM table_name";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            var columns = result.GetColumns();
+            Assert.AreEqual(0, columns.Count, "Column counts don't match");
+            Assert.AreEqual(1, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table_name", tables[0], "Table name does not match");
+        }
+
+        [TestMethod]
+        public void ParsingSelectWithMultipleColumnsAndOneTableReturnsCorrectObject()
+        {
+            const string sql = "SELECT column0, column1 FROM table_name";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            var columns = result.GetColumns();
+            Assert.AreEqual(2, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0], "Column name does not match");
+            Assert.AreEqual("column1", columns[1], "Column name does not match");
+            Assert.AreEqual(1, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table_name", tables[0], "Table name does not match");
+        }
+
+        [TestMethod]
+        public void ParsingSelectWithOneColumnAndMultipleTablesReturnsCorrectObject()
+        {
+            const string sql = "SELECT column_name FROM table0, table1";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column_name", columns[0], "Column name does not match");
+            Assert.AreEqual(2, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table0", tables[0], "Table name does not match");
+            Assert.AreEqual("table1", tables[1], "Table name does not match");
+        }
+
+        [TestMethod]
+        public void ParsingSelectWithMultipleColumnsAndMultipleTablesReturnsCorrectObject()
+        {
+            const string sql = "SELECT column0, column1 FROM table0, table1";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            var columns = result.GetColumns();
+            Assert.AreEqual(2, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0], "Column name does not match");
+            Assert.AreEqual("column1", columns[1], "Column name does not match");
+            Assert.AreEqual(2, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table0", tables[0], "Table name does not match");
+            Assert.AreEqual("table1", tables[1], "Table name does not match");
+        }
+
+        [TestMethod]
+        public void ParsingSelectStarWithMultipleTablesReturnsCorrectObject()
+        {
+            const string sql = "SELECT * FROM table0, table1";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            var columns = result.GetColumns();
+            Assert.AreEqual(0, columns.Count, "Column counts don't match");
+            Assert.AreEqual(2, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table0", tables[0], "Table name does not match");
+            Assert.AreEqual("table1", tables[1], "Table name does not match");
+        }
+
+        [TestMethod]
+        public void ParsingSelectWithDistinctColumnAndOneTableReturnsCorrectObject()
+        {
+            const string sql = "SELECT DISTINCT column_name FROM table_name";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            var columns = result.GetColumns();
+            Assert.IsTrue(result.IsDistinctSelection);
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column_name", columns[0], "Column name does not match");
+            Assert.AreEqual(1, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table_name", tables[0], "Table name does not match");
+        }
+
+        [TestMethod]
+        public void ParsingSelectWithDistinctMultipleColumnsAndOneTableReturnsCorrectObject()
+        {
+            const string sql = "SELECT DISTINCT column0, column1 FROM table_name";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            var columns = result.GetColumns();
+            Assert.IsTrue(result.IsDistinctSelection);
+            Assert.AreEqual(2, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0], "Column name does not match");
+            Assert.AreEqual("column1", columns[1], "Column name does not match");
+            Assert.AreEqual(1, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table_name", tables[0], "Table name does not match");
+        }
+
+        [TestMethod]
+        public void ParsingSelectTopWithOneColumnAndOneTableReturnsCorrectObject()
+        {
+            const string sql = "SELECT TOP 10 column_name FROM table_name";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            var columns = result.GetColumns();
+            Assert.IsTrue(result.IsTopSelection);
+            Assert.IsFalse(result.IsTopPercent);
+            Assert.AreEqual(10, result.TopCount);
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column_name", columns[0], "Column name does not match");
+            Assert.AreEqual(1, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table_name", tables[0], "Table name does not match");
+        }
+
+        [TestMethod]
+        public void ParsingSelectTopPercentWithOneColumnAndOneTableReturnsCorrectObject()
+        {
+            const string sql = "SELECT TOP 20 PERCENT column_name FROM table_name";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            var columns = result.GetColumns();
+            Assert.IsTrue(result.IsTopSelection);
+            Assert.IsTrue(result.IsTopPercent);
+            Assert.AreEqual(20, result.TopCount);
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column_name", columns[0], "Column name does not match");
+            Assert.AreEqual(1, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table_name", tables[0], "Table name does not match");
         }
     }
 }
+
