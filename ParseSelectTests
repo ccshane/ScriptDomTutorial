@@ -240,6 +240,30 @@ namespace ScriptDomTests
             Assert.AreEqual("table_2", tables[1].Name, "Table name does not match");
             Assert.AreEqual("t2", tables[1].Alias, "Table alias does not match");
         }
+
+        [TestMethod]
+        public void ParsingSelectIdentityExitsParsing()
+        {
+            const string sql = "SELECT @@IDENTITY";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(0, tables.Count, "Table counts don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(0, columns.Count, "Column counts don't match");
+        }
+
+        [TestMethod]
+        public void ParsingSelectFunctionReturnsCorrectObject()
+        {
+            const string sql = "SELECT Count(column_name) FROM table_name";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(1, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table_name",tables[0].Name);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column_name", columns[0].Name);
+        }
     }
 }
 
