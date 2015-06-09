@@ -46,6 +46,10 @@ namespace ScriptDomBlogSample
                             container.TopCount = Int32.Parse((querySpec.TopRowFilter.Expression as IntegerLiteral).Value);
                         }
                     }
+                    if (querySpec.FromClause == null)
+                    {
+                        continue;
+                    }
                     var tables = querySpec.FromClause.TableReferences;
                     foreach (var table in tables)
                     {
@@ -68,30 +72,19 @@ namespace ScriptDomBlogSample
                             if (expression is ColumnReferenceExpression)
                             {
                                 var columnExpression = expression as ColumnReferenceExpression;
-                                var identifier = columnExpression.MultiPartIdentifier;
-                                if (identifier.Identifiers.Count == 1)
+                                ParseColumnReferenceExpression(columnExpression, container, alias);
+                            }
+                            else if (expression is FunctionCall)
+                            {
+                                var functionExpression = expression as FunctionCall;
+                                var parameters = functionExpression.Parameters;
+                                foreach (var parameter in parameters)
                                 {
-                                    var columnName = identifier.Identifiers.First().Value;
-                                    var tableName = "";
-                                    var foundTables = container.GetTables();
-                                    if (foundTables.Count == 1)
+                                    if (parameter is ColumnReferenceExpression)
                                     {
-                                        tableName = foundTables[0].Name;
+                                        var columnExpression = parameter as ColumnReferenceExpression;
+                                        ParseColumnReferenceExpression(columnExpression, container, alias);
                                     }
-                                    container.AddColumn(columnName, alias, tableName);
-                                }
-                                else
-                                {
-                                    var tableRef = identifier.Identifiers.First().Value;
-                                    var foundTable = from x in container.GetTables()
-                                        where (x.Name.Equals(tableRef) || (x.Alias.Equals(tableRef)))
-                                        select x;
-                                    //var foundTable = from x in container.GetTables()
-                                    //                 where x.Alias.Equals(tableRef)
-                                    //    select x;
-                                    var columnName = identifier.Identifiers.Skip(1).First().Value;
-                                    var tableName = foundTable.FirstOrDefault().Name;
-                                    container.AddColumn(columnName, alias, tableName);
                                 }
                             }
                         }
@@ -102,6 +95,31 @@ namespace ScriptDomBlogSample
             return container;
         }
 
+        private void ParseColumnReferenceExpression(ColumnReferenceExpression columnExpression, DataContainer container,
+            string alias)
+        {
+            var identifier = columnExpression.MultiPartIdentifier;
+            if (identifier.Identifiers.Count == 1)
+            {
+                var columnName = identifier.Identifiers.First().Value;
+                var tableName = "";
+                var foundTables = container.GetTables();
+                if (foundTables.Count == 1)
+                {
+                    tableName = foundTables[0].Name;
+                }
+                container.AddColumn(columnName, alias, tableName);
+            }
+            else
+            {
+                var tableRef = identifier.Identifiers.First().Value;
+                var tableName = (from x in container.GetTables()
+                    where (x.Name.Equals(tableRef) || x.Alias.Equals(tableRef))
+                    select x).First().Name;
+                var columnName = identifier.Identifiers.Skip(1).First().Value;
+                container.AddColumn(columnName, alias, tableName);
+            }
+        }
     }
 }
 
