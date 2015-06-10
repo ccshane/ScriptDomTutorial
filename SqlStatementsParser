@@ -28,6 +28,11 @@ namespace ScriptDomBlogSample
                 if (statement is SelectStatement)
                 {
                     var select = statement as SelectStatement;
+                    var into = select.Into;
+                    if (into != null) {
+                        var table = into.BaseIdentifier.Value;
+                        container.AddTable(table, "");
+                    }
                     var querySpec = select.QueryExpression as QuerySpecification;
                     if (querySpec == null)
                     {
