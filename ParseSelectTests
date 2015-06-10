@@ -264,6 +264,20 @@ namespace ScriptDomTests
             Assert.AreEqual(1, columns.Count, "Column counts don't match");
             Assert.AreEqual("column_name", columns[0].Name);
         }
+        
+        [TestMethod]
+        public void ParsingSelectIntoReturnsCorrectObject() {
+            const string sql = "select col1, col2 into table2 from table1";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(2, tables.Count,"Table counts don't match");
+            Assert.AreEqual("table2", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table1", tables[1].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(2, columns.Count, "Column counts don't match");
+            Assert.AreEqual("col1", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("col2", columns[1].Name, "Column names don't match");
+        }
     }
 }
 
