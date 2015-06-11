@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,33 +29,68 @@ namespace ScriptDomBlogSample
                 {
                     var select = statement as SelectStatement;
                     var querySpec = select.QueryExpression as QuerySpecification;
-                    var columns = querySpec.SelectElements;
-                    foreach (var column in columns)
+                    if (querySpec == null)
                     {
-                        if (column is SelectScalarExpression)
+                        //nothing to do
+                        continue;
+                    }
+                    //check for distinct
+                    container.IsDistinctSelection = querySpec.UniqueRowFilter.ToString().ToUpper().Equals("DISTINCT");
+                    if (querySpec.TopRowFilter != null)
+                    {
+                        //check for top
+                        container.IsTopSelection = true;
+                        container.IsTopPercent = querySpec.TopRowFilter.Percent;
+                        if (querySpec.TopRowFilter.Expression is IntegerLiteral)
                         {
-                            var expression = (column as SelectScalarExpression).Expression;
-                            if (expression is ColumnReferenceExpression)
-                            {
-                                var columnExpression = expression as ColumnReferenceExpression;
-                                var identifier = columnExpression.MultiPartIdentifier;
-                                if (identifier.Identifiers.Count == 1)
-                                {
-                                    var columnName = identifier.Identifiers.First().Value;
-                                    container.AddColumn(columnName);
-                                }
-                            }
+                            container.TopCount = Int32.Parse((querySpec.TopRowFilter.Expression as IntegerLiteral).Value);
                         }
+                    }
+                    if (querySpec.FromClause == null)
+                    {
+                        continue;
                     }
                     var tables = querySpec.FromClause.TableReferences;
                     foreach (var table in tables)
                     {
                         if (table is NamedTableReference)
                         {
-                            var reference = table as NamedTableReference;
-                            var tableName = reference.SchemaObject.BaseIdentifier.Value;
-                            container.AddTable(tableName);
+                            ParsedNamedTableReference(table, container);
                         }
+                    }
+                    var columns = querySpec.SelectElements;
+                    foreach (var column in columns)
+                    {
+                        if (column is SelectScalarExpression)
+                        {
+                            var scalar = column as SelectScalarExpression;
+                            var alias = scalar.ColumnName==null?"":scalar.ColumnName.Value;
+                            var expression = scalar.Expression;
+                            if (expression is ColumnReferenceExpression)
+                            {
+                                var columnExpression = expression as ColumnReferenceExpression;
+                                ParseColumnReferenceExpression(columnExpression, container, alias);
+                            }
+                            else if (expression is FunctionCall)
+                            {
+                                var functionExpression = expression as FunctionCall;
+                                ParseFunctionCall(functionExpression, container, alias);
+                            }
+                        }
+                    }
+                }
+                else if (statement is InsertStatement)
+                {
+                    var insertStatement = statement as InsertStatement;
+                    var insertSpec = insertStatement.InsertSpecification;
+                    var target = insertSpec.Target;
+                    if (target is NamedTableReference)
+                    {
+                        ParsedNamedTableReference(target, container);
+                    }
+                    foreach (var column in insertSpec.Columns)
+                    {
+                        ParseColumnReferenceExpression(column, container, "");
                     }
                 }
             }
@@ -62,5 +98,57 @@ namespace ScriptDomBlogSample
             return container;
         }
 
+        private void ParseFunctionCall(FunctionCall functionExpression, DataContainer container, string alias)
+        {
+            var parameters = functionExpression.Parameters;
+            foreach (var parameter in parameters)
+            {
+                if (parameter is ColumnReferenceExpression)
+                {
+                    var columnExpression = parameter as ColumnReferenceExpression;
+                    ParseColumnReferenceExpression(columnExpression, container, alias);
+                }
+                else if (parameter is FunctionCall)
+                {
+                    var function = parameter as FunctionCall;
+                    ParseFunctionCall(function, container, alias);
+                }
+            }
+        }
+
+        private void ParsedNamedTableReference(TableReference table, DataContainer container)
+        {
+            var reference = table as NamedTableReference;
+            var tableName = reference.SchemaObject.BaseIdentifier.Value;
+            var alias = reference.Alias == null ? "" : reference.Alias.Value;
+            container.AddTable(tableName, alias);
+        }
+
+        private void ParseColumnReferenceExpression(ColumnReferenceExpression columnExpression, DataContainer container,
+            string alias)
+        {
+            var identifier = columnExpression.MultiPartIdentifier;
+            if (identifier.Identifiers.Count == 1)
+            {
+                var columnName = identifier.Identifiers.First().Value;
+                var tableName = "";
+                var foundTables = container.GetTables();
+                if (foundTables.Count == 1)
+                {
+                    tableName = foundTables[0].Name;
+                }
+                container.AddColumn(columnName, alias, tableName);
+            }
+            else
+            {
+                var tableRef = identifier.Identifiers.First().Value;
+                var tableName = (from x in container.GetTables()
+                    where (x.Name.Equals(tableRef) || x.Alias.Equals(tableRef))
+                    select x).First().Name;
+                var columnName = identifier.Identifiers.Skip(1).First().Value;
+                container.AddColumn(columnName, alias, tableName);
+            }
+        }
     }
 }
+
