@@ -28,6 +28,12 @@ namespace ScriptDomBlogSample
                 if (statement is SelectStatement)
                 {
                     var select = statement as SelectStatement;
+                    var into = select.Into;
+                    if (into != null)
+                    {
+                        var table = into.BaseIdentifier.Value;
+                        container.AddTable(table,"");
+                    }
                     var querySpec = select.QueryExpression as QuerySpecification;
                     if (querySpec == null)
                     {
@@ -61,6 +67,10 @@ namespace ScriptDomBlogSample
                     var columns = querySpec.SelectElements;
                     foreach (var column in columns)
                     {
+                        if (column is SelectStarExpression)
+                        {
+                            continue;
+                        }
                         if (column is SelectScalarExpression)
                         {
                             var scalar = column as SelectScalarExpression;
@@ -93,7 +103,25 @@ namespace ScriptDomBlogSample
                         ParseColumnReferenceExpression(column, container, "");
                     }
                 }
-            }
+                else if (statement is UpdateStatement)
+                {
+                    var updateStatement = statement as UpdateStatement;
+                    var updateSpec = updateStatement.UpdateSpecification;
+                    var target = updateSpec.Target;
+                    if (target is NamedTableReference)
+                    {
+                        ParsedNamedTableReference(target, container);
+                    }
+                    foreach (var setClause in updateSpec.SetClauses)
+                    {
+                        if (setClause is AssignmentSetClause)
+                        {
+                            var assignment = setClause as AssignmentSetClause;
+                            ParseColumnReferenceExpression(assignment.Column,container,"");
+                        }
+                    }
+                }
+             }
             //end parser code
             return container;
         }
@@ -148,6 +176,11 @@ namespace ScriptDomBlogSample
                 var columnName = identifier.Identifiers.Skip(1).First().Value;
                 container.AddColumn(columnName, alias, tableName);
             }
+        }
+
+        private void ParseWhereClause(WhereClause clause, DataContainer container)
+        {
+            
         }
     }
 }
