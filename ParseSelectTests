@@ -28,13 +28,9 @@ namespace ScriptDomTests
             var tables = result.GetTables();
             var columns = result.GetColumns();
             Assert.AreEqual(1, columns.Count, "Column counts don't match");
-            Assert.AreEqual("hello", columns[0].Name, "Column name does not 
-
-match");
+            Assert.AreEqual("hello", columns[0].Name, "Column name does not match");
             Assert.AreEqual(1, tables.Count, "Table counts don't match");
-            Assert.AreEqual("world", tables[0].Name, "Table name does not 
-
-match");
+            Assert.AreEqual("world", tables[0].Name, "Table name does not match");
         }
 
         [TestMethod]
@@ -45,16 +41,10 @@ match");
             var tables = result.GetTables();
             var columns = result.GetColumns();
             Assert.AreEqual(1, columns.Count, "Column counts don't match");
-            Assert.AreEqual("column_name", columns[0].Name, "Column name does 
-
-not match");
-            Assert.AreEqual("table_name",columns[0].BelongsToTable, "Column 
-
-table does not match");
+            Assert.AreEqual("column_name", columns[0].Name, "Column name does not match");
+            Assert.AreEqual("table_name",columns[0].BelongsToTable, "Column table does not match");
             Assert.AreEqual(1, tables.Count, "Table counts don't match");
-            Assert.AreEqual("table_name", tables[0].Name, "Table name does not 
-
-match");
+            Assert.AreEqual("table_name", tables[0].Name, "Table name does not match");
         }
 
         [TestMethod]
@@ -64,20 +54,12 @@ match");
             var result = _parser.Parse(sql);
             var tables = result.GetTables();
             Assert.AreEqual(2, tables.Count,"Table counts don't match");
-            Assert.AreEqual("table2", tables[0].Name, "Table names don't 
-
-match");
-            Assert.AreEqual("table1", tables[1].Name, "Table names don't 
-
-match");
+            Assert.AreEqual("table2", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table1", tables[1].Name, "Table names don't match");
             var columns = result.GetColumns();
             Assert.AreEqual(2, columns.Count, "Column counts don't match");
-            Assert.AreEqual("col1", columns[0].Name, "Column names don't 
-
-match");
-            Assert.AreEqual("col2", columns[1].Name, "Column names don't 
-
-match");
+            Assert.AreEqual("col1", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("col2", columns[1].Name, "Column names don't match");
         }
 
         [TestMethod]
@@ -89,78 +71,50 @@ match");
             var columns = result.GetColumns();
             Assert.AreEqual(0, columns.Count, "Column counts don't match");
             Assert.AreEqual(1, tables.Count, "Table counts don't match");
-            Assert.AreEqual("table_name", tables[0].Name, "Table name does not 
-
-match");
+            Assert.AreEqual("table_name", tables[0].Name, "Table name does not match");
         }
 
         [TestMethod]
-        public void 
-
-ParsingSelectWithMultipleColumnsAndOneTableReturnsCorrectObject()
+        public void ParsingSelectWithMultipleColumnsAndOneTableReturnsCorrectObject()
         {
             const string sql = "SELECT column0, column1 FROM table_name";
             var result = _parser.Parse(sql);
             var tables = result.GetTables();
             var columns = result.GetColumns();
             Assert.AreEqual(2, columns.Count, "Column counts don't match");
-            Assert.AreEqual("column0", columns[0].Name, "Column name does not 
-
-match");
-            Assert.AreEqual("column1", columns[1].Name, "Column name does not 
-
-match");
+            Assert.AreEqual("column0", columns[0].Name, "Column name does not match");
+            Assert.AreEqual("column1", columns[1].Name, "Column name does not match");
             Assert.AreEqual(1, tables.Count, "Table counts don't match");
-            Assert.AreEqual("table_name", tables[0].Name, "Table name does not 
-
-match");
+            Assert.AreEqual("table_name", tables[0].Name, "Table name does not match");
         }
 
         [TestMethod]
-        public void 
-
-ParsingSelectWithOneColumnAndMultipleTablesReturnsCorrectObject()
+        public void ParsingSelectWithOneColumnAndMultipleTablesReturnsCorrectObject()
         {
             const string sql = "SELECT column_name FROM table0, table1";
             var result = _parser.Parse(sql);
             var tables = result.GetTables();
             var columns = result.GetColumns();
             Assert.AreEqual(1, columns.Count, "Column counts don't match");
-            Assert.AreEqual("column_name", columns[0].Name, "Column name does 
-
-not match");
+            Assert.AreEqual("column_name", columns[0].Name, "Column name does not match");
             Assert.AreEqual(2, tables.Count, "Table counts don't match");
-            Assert.AreEqual("table0", tables[0].Name, "Table name does not 
-
-match");
-            Assert.AreEqual("table1", tables[1].Name, "Table name does not 
-
-match");
+            Assert.AreEqual("table0", tables[0].Name, "Table name does not match");
+            Assert.AreEqual("table1", tables[1].Name, "Table name does not match");
         }
 
         [TestMethod]
-        public void 
-
-ParsingSelectWithMultipleColumnsAndMultipleTablesReturnsCorrectObject()
+        public void ParsingSelectWithMultipleColumnsAndMultipleTablesReturnsCorrectObject()
         {
             const string sql = "SELECT column0, column1 FROM table0, table1";
             var result = _parser.Parse(sql);
             var tables = result.GetTables();
             var columns = result.GetColumns();
             Assert.AreEqual(2, columns.Count, "Column counts don't match");
-            Assert.AreEqual("column0", columns[0].Name, "Column name does not 
-
-match");
-            Assert.AreEqual("column1", columns[1].Name, "Column name does not 
-
-match");
+            Assert.AreEqual("column0", columns[0].Name, "Column name does not match");
+            Assert.AreEqual("column1", columns[1].Name, "Column name does not match");
             Assert.AreEqual(2, tables.Count, "Table counts don't match");
-            Assert.AreEqual("table0", tables[0].Name, "Table name does not 
-
-match");
-            Assert.AreEqual("table1", tables[1].Name, "Table name does not 
-
-match");
+            Assert.AreEqual("table0", tables[0].Name, "Table name does not match");
+            Assert.AreEqual("table1", tables[1].Name, "Table name does not match");
         }
 
         [TestMethod]
@@ -172,18 +126,12 @@ match");
             var columns = result.GetColumns();
             Assert.AreEqual(0, columns.Count, "Column counts don't match");
             Assert.AreEqual(2, tables.Count, "Table counts don't match");
-            Assert.AreEqual("table0", tables[0].Name, "Table name does not 
-
-match");
-            Assert.AreEqual("table1", tables[1].Name, "Table name does not 
-
-match");
+            Assert.AreEqual("table0", tables[0].Name, "Table name does not match");
+            Assert.AreEqual("table1", tables[1].Name, "Table name does not match");
         }
 
         [TestMethod]
-        public void 
-
-ParsingSelectWithDistinctColumnAndOneTableReturnsCorrectObject()
+        public void ParsingSelectWithDistinctColumnAndOneTableReturnsCorrectObject()
         {
             const string sql = "SELECT DISTINCT column_name FROM table_name";
             var result = _parser.Parse(sql);
@@ -191,44 +139,28 @@ ParsingSelectWithDistinctColumnAndOneTableReturnsCorrectObject()
             var columns = result.GetColumns();
             Assert.IsTrue(result.IsDistinctSelection);
             Assert.AreEqual(1, columns.Count, "Column counts don't match");
-            Assert.AreEqual("column_name", columns[0].Name, "Column name does 
-
-not match");
+            Assert.AreEqual("column_name", columns[0].Name, "Column name does not match");
             Assert.AreEqual(1, tables.Count, "Table counts don't match");
-            Assert.AreEqual("table_name", tables[0].Name, "Table name does not 
-
-match");
+            Assert.AreEqual("table_name", tables[0].Name, "Table name does not match");
         }
 
         [TestMethod]
-        public void 
-
-ParsingSelectWithDistinctMultipleColumnsAndOneTableReturnsCorrectObject()
+        public void ParsingSelectWithDistinctMultipleColumnsAndOneTableReturnsCorrectObject()
         {
-            const string sql = "SELECT DISTINCT column0, column1 FROM 
-
-table_name";
+            const string sql = "SELECT DISTINCT column0, column1 FROM table_name";
             var result = _parser.Parse(sql);
             var tables = result.GetTables();
             var columns = result.GetColumns();
             Assert.IsTrue(result.IsDistinctSelection);
             Assert.AreEqual(2, columns.Count, "Column counts don't match");
-            Assert.AreEqual("column0", columns[0].Name, "Column name does not 
-
-match");
-            Assert.AreEqual("column1", columns[1].Name, "Column name does not 
-
-match");
+            Assert.AreEqual("column0", columns[0].Name, "Column name does not match");
+            Assert.AreEqual("column1", columns[1].Name, "Column name does not match");
             Assert.AreEqual(1, tables.Count, "Table counts don't match");
-            Assert.AreEqual("table_name", tables[0].Name, "Table name does not 
-
-match");
+            Assert.AreEqual("table_name", tables[0].Name, "Table name does not match");
         }
 
         [TestMethod]
-        public void 
-
-ParsingSelectTopWithOneColumnAndOneTableReturnsCorrectObject()
+        public void ParsingSelectTopWithOneColumnAndOneTableReturnsCorrectObject()
         {
             const string sql = "SELECT TOP 10 column_name FROM table_name";
             var result = _parser.Parse(sql);
@@ -238,23 +170,25 @@ ParsingSelectTopWithOneColumnAndOneTableReturnsCorrectObject()
             Assert.IsFalse(result.IsTopPercent);
             Assert.AreEqual(10, result.TopCount);
             Assert.AreEqual(1, columns.Count, "Column counts don't match");
-            Assert.AreEqual("column_name", columns[0].Name, "Column name does 
-
-not match");
+            Assert.AreEqual("column_name", columns[0].Name, "Column name does not match");
             Assert.AreEqual(1, tables.Count, "Table counts don't match");
-            Assert.AreEqual("table_name", tables[0].Name, "Table name does not 
-
-match");
+            Assert.AreEqual("table_name", tables[0].Name, "Table name does not match");
         }
 
         [TestMethod]
-        public void 
-
-ParsingSelectTopPercentWithOneColumnAndOneTableReturnsCorrectObject()
+        public void ParsingSelectParenthesizedTopSetsProperties()
         {
-            const string sql = "SELECT TOP 20 PERCENT column_name FROM 
+            const string sql = "SELECT TOP (10) column_name FROM table_name";
+            var result = _parser.Parse(sql);
+            Assert.IsTrue(result.IsTopSelection);
+            Assert.IsFalse(result.IsTopPercent);
+            Assert.AreEqual(10, result.TopCount);
+        }
 
-table_name";
+        [TestMethod]
+        public void ParsingSelectTopPercentWithOneColumnAndOneTableReturnsCorrectObject()
+        {
+            const string sql = "SELECT TOP 20 PERCENT column_name FROM table_name";
             var result = _parser.Parse(sql);
             var tables = result.GetTables();
             var columns = result.GetColumns();
@@ -262,13 +196,9 @@ table_name";
             Assert.IsTrue(result.IsTopPercent);
             Assert.AreEqual(20, result.TopCount);
             Assert.AreEqual(1, columns.Count, "Column counts don't match");
-            Assert.AreEqual("column_name", columns[0].Name, "Column name does 
-
-not match");
+            Assert.AreEqual("column_name", columns[0].Name, "Column name does not match");
             Assert.AreEqual(1, tables.Count, "Table counts don't match");
-            Assert.AreEqual("table_name", tables[0].Name, "Table name does not 
-
-match");
+            Assert.AreEqual("table_name", tables[0].Name, "Table name does not match");
         }
 
         [TestMethod]
@@ -278,9 +208,7 @@ match");
             var result = _parser.Parse(sql);
             var tables = result.GetTables();
             Assert.AreEqual(1, tables.Count, "Table counts don't match");
-            Assert.AreEqual("table_name", tables[0].Name, "Table name does not 
-
-match");
+            Assert.AreEqual("table_name", tables[0].Name, "Table name does not match");
             Assert.AreEqual("tm",tables[0].Alias,"Table alias does not match");
         }
 
@@ -291,29 +219,19 @@ match");
             var result = _parser.Parse(sql);
             var columns = result.GetColumns();
             Assert.AreEqual(1, columns.Count, "Column counts don't match");
-            Assert.AreEqual("column_name", columns[0].Name, "Column name does 
-
-not match");
-            Assert.AreEqual("cm", columns[0].Alias, "Column alias does not 
-
-match");
+            Assert.AreEqual("column_name", columns[0].Name, "Column name does not match");
+            Assert.AreEqual("cm", columns[0].Alias, "Column alias does not match");
         }
 
         [TestMethod]
-        public void 
-
-ParsingSelectWithTableSpecificColumnAddsTableColumnReference()
+        public void ParsingSelectWithTableSpecificColumnAddsTableColumnReference()
         {
             const string sql = "SELECT table_name.column_name FROM table_name";
             var result = _parser.Parse(sql);
             var columns = result.GetColumns();
             Assert.AreEqual(1, columns.Count, "Column counts don't match");
-            Assert.AreEqual("column_name", columns[0].Name, "Column name does 
-
-not match");
-            Assert.AreEqual("table_name", columns[0].BelongsToTable, "Column 
-
-table name does not match");
+            Assert.AreEqual("column_name", columns[0].Name, "Column name does not match");
+            Assert.AreEqual("table_name", columns[0].BelongsToTable, "Column table name does not match");
         }
 
         [TestMethod]
@@ -323,55 +241,29 @@ table name does not match");
             var result = _parser.Parse(sql);
             var columns = result.GetColumns();
             Assert.AreEqual(1, columns.Count, "Column counts don't match");
-            Assert.AreEqual("column_name", columns[0].Name, "Column name does 
-
-not match");
-            Assert.AreEqual("table_name", columns[0].BelongsToTable, "Column 
-
-table name does not match");
+            Assert.AreEqual("column_name", columns[0].Name, "Column name does not match");
+            Assert.AreEqual("table_name", columns[0].BelongsToTable, "Column table name does not match");
         }
 
         [TestMethod]
-        public void 
-
-ParsingSelectWithMultipleAliasedTablesAndColumnsReturnsCorrectObject()
+        public void ParsingSelectWithMultipleAliasedTablesAndColumnsReturnsCorrectObject()
         {
-            const string sql = "SELECT t1.column_name as col1, t2.column_name 
-
-as col2 FROM table_1 t1, table_2 t2";
+            const string sql = "SELECT t1.column_name as col1, t2.column_name as col2 FROM table_1 t1, table_2 t2";
             var result = _parser.Parse(sql);
             var tables = result.GetTables();
             var columns = result.GetColumns();
             Assert.AreEqual(2, columns.Count, "Column counts don't match");
-            Assert.AreEqual("column_name", columns[0].Name, "Column name does 
-
-not match");
-            Assert.AreEqual("col1", columns[0].Alias, "Column alias does not 
-
-match");
-            Assert.AreEqual("table_1", columns[0].BelongsToTable, "Column table 
-
-name does not match");
-            Assert.AreEqual("column_name", columns[1].Name, "Column name does 
-
-not match");
-            Assert.AreEqual("col2", columns[1].Alias, "Column alias does not 
-
-match");
-            Assert.AreEqual("table_2", columns[1].BelongsToTable, "Column table 
-
-name does not match");
+            Assert.AreEqual("column_name", columns[0].Name, "Column name does not match");
+            Assert.AreEqual("col1", columns[0].Alias, "Column alias does not match");
+            Assert.AreEqual("table_1", columns[0].BelongsToTable, "Column table name does not match");
+            Assert.AreEqual("column_name", columns[1].Name, "Column name does not match");
+            Assert.AreEqual("col2", columns[1].Alias, "Column alias does not match");
+            Assert.AreEqual("table_2", columns[1].BelongsToTable, "Column table name does not match");
             Assert.AreEqual(2, tables.Count, "Table counts don't match");
-            Assert.AreEqual("table_1", tables[0].Name, "Table name does not 
-
-match");
+            Assert.AreEqual("table_1", tables[0].Name, "Table name does not match");
             Assert.AreEqual("t1",tables[0].Alias,"Table alias does not match");
-            Assert.AreEqual("table_2", tables[1].Name, "Table name does not 
-
-match");
-            Assert.AreEqual("t2", tables[1].Alias, "Table alias does not 
-
-match");
+            Assert.AreEqual("table_2", tables[1].Name, "Table name does not match");
+            Assert.AreEqual("t2", tables[1].Alias, "Table alias does not match");
         }
 
         [TestMethod]
