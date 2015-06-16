@@ -47,9 +47,18 @@ namespace ScriptDomBlogSample
                         //check for top
                         container.IsTopSelection = true;
                         container.IsTopPercent = querySpec.TopRowFilter.Percent;
-                        if (querySpec.TopRowFilter.Expression is IntegerLiteral)
+                        ScalarExpression expression;
+                        if (querySpec.TopRowFilter.Expression is ParenthesisExpression)
                         {
-                            container.TopCount = Int32.Parse((querySpec.TopRowFilter.Expression as IntegerLiteral).Value);
+                            expression = (querySpec.TopRowFilter.Expression as ParenthesisExpression).Expression;
+                        }
+                        else
+                        {
+                            expression = querySpec.TopRowFilter.Expression;
+                        }
+                        if (expression is IntegerLiteral)
+                        {
+                            container.TopCount = Int32.Parse((expression as IntegerLiteral).Value);
                         }
                     }
                     if (querySpec.FromClause == null)
@@ -121,7 +130,28 @@ namespace ScriptDomBlogSample
                         }
                     }
                 }
-             }
+                else if (statement is DeleteStatement)
+                {
+                    var deleteStatement = statement as DeleteStatement;
+                    var deleteSpec = deleteStatement.DeleteSpecification;
+                    if (deleteSpec.TopRowFilter != null)
+                    {
+                        //check for top
+                        container.IsTopSelection = true;
+                        container.IsTopPercent = deleteSpec.TopRowFilter.Percent;
+                        var expression = deleteSpec.TopRowFilter.Expression as ParenthesisExpression;
+                        if (expression!=null && expression.Expression is IntegerLiteral)
+                        {
+                            container.TopCount = Int32.Parse((expression.Expression as IntegerLiteral).Value);
+                        }
+                    }
+                    var target = deleteSpec.Target;
+                    if (target is NamedTableReference)
+                    {
+                        ParsedNamedTableReference(target, container);
+                    }
+                }
+            }
             //end parser code
             return container;
         }
