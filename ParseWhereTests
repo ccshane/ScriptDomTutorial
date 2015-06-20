@@ -1,0 +1,91 @@
+using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ScriptDomBlogSample;
+
+namespace ScriptDomTests
+{
+    [TestClass]
+    public class ParseWhereTests
+    {
+        private SqlStatementsParser _parser;
+
+        [TestInitialize]
+        public void SetUp()
+        {
+            _parser = new SqlStatementsParser();
+        }
+
+        [TestCleanup]
+        public void TearDown()
+        {
+            _parser = null;
+        }
+
+        [TestMethod]
+        public void ParseSimpleAssignmentWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE column_name=5";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column_name", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseAndedWhereClauseAddsBothColumns()
+        {
+            const string sql = "SELECT * FROM table_name WHERE column0=5 AND column1 = 6";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(2, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseParenthesizedAndedWhereClauseAddsBothColumns()
+        {
+            const string sql = "SELECT * FROM table_name WHERE (column0=5 AND column1 = 6)";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(2, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseOredWhereClauseAddsBothColumns()
+        {
+            const string sql = "SELECT * FROM table_name WHERE column0=5 OR column1 = 6";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(2, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseParenthesizedOredWhereClauseAddsBothColumns()
+        {
+            const string sql = "SELECT * FROM table_name WHERE (column0=5 OR column1 = 6)";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(2, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseNestParenthesizedAndsOrsWhereClauseAddsAllColumns()
+        {
+            const string sql = "SELECT * FROM table_name WHERE ((column0=5 OR column1 = 6) AND column2=7)";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(3, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+            Assert.AreEqual("column2", columns[2].Name, "Column names don't match");
+        }
+
+    }
+}
