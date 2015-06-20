@@ -97,6 +97,10 @@ namespace ScriptDomBlogSample
                             }
                         }
                     }
+                    if (querySpec.WhereClause != null)
+                    {
+                        ParseWhereClause(querySpec.WhereClause,container);
+                    }
                 }
                 else if (statement is InsertStatement)
                 {
@@ -210,7 +214,68 @@ namespace ScriptDomBlogSample
 
         private void ParseWhereClause(WhereClause clause, DataContainer container)
         {
-            
+            var condition = clause.SearchCondition;
+            if (condition == null)
+            {
+                return;
+            }
+            if (condition is BooleanParenthesisExpression)
+            {
+                ParseBooleanParenthesisExpression(condition as BooleanParenthesisExpression, container);
+            }
+            else if (condition is BooleanComparisonExpression)
+            {
+                ParseBooleanComparisonExpression(condition as BooleanComparisonExpression, container);
+            }
+            else if (condition is BooleanBinaryExpression)
+            {
+                ParseBooleanBinaryExpression(condition as BooleanBinaryExpression, container);
+            }
+        }
+
+        private void ParseBooleanParenthesisExpression(BooleanParenthesisExpression expression, DataContainer container)
+        {
+            ParseBooleanExpression(expression.Expression, container);
+        }
+
+        private void ParseBooleanBinaryExpression(BooleanBinaryExpression expression, DataContainer container)
+        {
+            var left = expression.FirstExpression;
+            ParseBooleanExpression(left, container);
+            var right = expression.SecondExpression;
+            ParseBooleanExpression(right, container);
+        }
+
+        private void ParseBooleanExpression(BooleanExpression expression, DataContainer container)
+        {
+            if (expression is BooleanComparisonExpression)
+            {
+                ParseBooleanComparisonExpression(expression as BooleanComparisonExpression, container);
+            }
+            else if (expression is BooleanBinaryExpression)
+            {
+                ParseBooleanBinaryExpression(expression as BooleanBinaryExpression, container);
+            }
+            else if (expression is BooleanParenthesisExpression)
+            {
+                ParseBooleanParenthesisExpression(expression as BooleanParenthesisExpression, container);
+            }
+        }
+
+        private void ParseBooleanComparisonExpression(BooleanComparisonExpression expression, DataContainer container)
+        {
+            var left = expression.FirstExpression;
+            ParseScalarExpression(left, container);
+            var right = expression.SecondExpression;
+            ParseScalarExpression(right, container);
+        }
+
+        private void ParseScalarExpression(ScalarExpression expression, DataContainer container)
+        {
+            if (expression is ColumnReferenceExpression)
+            {
+                ParseColumnReferenceExpression(expression as ColumnReferenceExpression, container, "");
+            }
         }
     }
 }
