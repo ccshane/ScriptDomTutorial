@@ -87,5 +87,146 @@ namespace ScriptDomTests
             Assert.AreEqual("column2", columns[2].Name, "Column names don't match");
         }
 
+        [TestMethod]
+        public void ParseNotWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE NOT (column0=5)";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseBetweenWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE column0 BETWEEN 1 AND 10";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseNotBetweenWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE column0 NOT BETWEEN 1 AND 10";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseDifferentNotBetweenWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE NOT column0 BETWEEN 1 AND 10";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseIsNullWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE column0 IS NULL";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseIsNotNullWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE column0 IS NOT NULL";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseNotIsNullWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE NOT column0 IS NULL";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseInWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE column0 IN (1,2,3)";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseNotXInWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE NOT column0 IN (1,2,3)";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseXNotInWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE column0 NOT IN (1,2,3)";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseInWithExpressionsWhereClauseAddsColumns()
+        {
+            const string sql = "SELECT * FROM table_name WHERE column0 IN (column1, column2)";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(3, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+            Assert.AreEqual("column2", columns[2].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseLikeWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE column0 LIKE '%something%'";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseNotXLikeWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE NOT column0 LIKE '%something%'";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseXNotLkeWhereClauseAddsColumn()
+        {
+            const string sql = "SELECT * FROM table_name WHERE column0 NOT LIKE '%something%'";
+            var result = _parser.Parse(sql);
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
     }
 }
