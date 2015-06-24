@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -231,6 +232,73 @@ namespace ScriptDomBlogSample
             {
                 ParseBooleanBinaryExpression(condition as BooleanBinaryExpression, container);
             }
+            else if (condition is BooleanNotExpression)
+            {
+                ParseBooleanNotExpression(condition as BooleanNotExpression, container);
+            }
+            else if (condition is BooleanTernaryExpression)
+            {
+                ParseBooleanTernaryExpression(condition as BooleanTernaryExpression, container);
+            }
+            else if (condition is BooleanIsNullExpression)
+            {
+                ParseBooleanIsNullExpression(condition as BooleanIsNullExpression, container);
+            }
+            else if (condition is InPredicate)
+            {
+                ParseInPredicate(condition as InPredicate, container);
+            }
+            else if (condition is LikePredicate)
+            {
+                ParseLikePredicate(condition as LikePredicate, container);
+            }
+        }
+
+        private void ParseLikePredicate(LikePredicate predicate, DataContainer container)
+        {
+            var initial = predicate.FirstExpression;
+            ParseScalarExpression(initial,container);
+            var compareTo = predicate.SecondExpression;
+            ParseScalarExpression(compareTo, container);
+            var escape = predicate.EscapeExpression;
+            ParseScalarExpression(escape, container);
+        }
+
+        private void ParseInPredicate(InPredicate predicate, DataContainer container)
+        {
+            ParseScalarExpression(predicate.Expression, container);
+            foreach (var scalarExpression in predicate.Values)
+            {
+                ParseScalarExpression(scalarExpression, container);
+            }
+        }
+
+        private void ParseBooleanIsNullExpression(BooleanIsNullExpression expression, DataContainer container)
+        {
+            if (expression.IsNot)
+            {
+                Debug.WriteLine("IS NOT NULL");
+            }
+            else
+            {
+                Debug.WriteLine("IS NULL");
+            }
+            ParseScalarExpression(expression.Expression, container);
+        }
+
+        private void ParseBooleanTernaryExpression(BooleanTernaryExpression expression, DataContainer container)
+        {
+            var initial = expression.FirstExpression;
+            ParseScalarExpression(initial, container);
+            var lower = expression.SecondExpression;
+            ParseScalarExpression(lower,container);
+            var higher = expression.ThirdExpression;
+            ParseScalarExpression(higher,container);
+        }
+
+        private void ParseBooleanNotExpression(BooleanNotExpression expression, DataContainer container)
+        {
+            ParseBooleanExpression(expression.Expression,container);
         }
 
         private void ParseBooleanParenthesisExpression(BooleanParenthesisExpression expression, DataContainer container)
@@ -259,6 +327,22 @@ namespace ScriptDomBlogSample
             else if (expression is BooleanParenthesisExpression)
             {
                 ParseBooleanParenthesisExpression(expression as BooleanParenthesisExpression, container);
+            }
+            else if (expression is BooleanTernaryExpression)
+            {
+                ParseBooleanTernaryExpression(expression as BooleanTernaryExpression, container);
+            }
+            else if (expression is BooleanIsNullExpression)
+            {
+                ParseBooleanIsNullExpression(expression as BooleanIsNullExpression, container);
+            }
+            else if (expression is InPredicate)
+            {
+                ParseInPredicate(expression as InPredicate, container);
+            }
+            else if (expression is LikePredicate)
+            {
+                ParseLikePredicate(expression as LikePredicate, container);
             }
         }
 
