@@ -62,46 +62,7 @@ namespace ScriptDomBlogSample
                             container.TopCount = Int32.Parse((expression as IntegerLiteral).Value);
                         }
                     }
-                    if (querySpec.FromClause == null)
-                    {
-                        continue;
-                    }
-                    var tables = querySpec.FromClause.TableReferences;
-                    foreach (var table in tables)
-                    {
-                        if (table is NamedTableReference)
-                        {
-                            ParsedNamedTableReference(table, container);
-                        }
-                    }
-                    var columns = querySpec.SelectElements;
-                    foreach (var column in columns)
-                    {
-                        if (column is SelectStarExpression)
-                        {
-                            continue;
-                        }
-                        if (column is SelectScalarExpression)
-                        {
-                            var scalar = column as SelectScalarExpression;
-                            var alias = scalar.ColumnName==null?"":scalar.ColumnName.Value;
-                            var expression = scalar.Expression;
-                            if (expression is ColumnReferenceExpression)
-                            {
-                                var columnExpression = expression as ColumnReferenceExpression;
-                                ParseColumnReferenceExpression(columnExpression, container, alias);
-                            }
-                            else if (expression is FunctionCall)
-                            {
-                                var functionExpression = expression as FunctionCall;
-                                ParseFunctionCall(functionExpression, container, alias);
-                            }
-                        }
-                    }
-                    if (querySpec.WhereClause != null)
-                    {
-                        ParseWhereClause(querySpec.WhereClause,container);
-                    }
+                    ParseQueryExpression(querySpec, container);
                 }
                 else if (statement is InsertStatement)
                 {
@@ -134,6 +95,10 @@ namespace ScriptDomBlogSample
                             ParseColumnReferenceExpression(assignment.Column,container,"");
                         }
                     }
+                    if (updateSpec.WhereClause != null)
+                    {
+                        ParseWhereClause(updateSpec.WhereClause, container);
+                    }
                 }
                 else if (statement is DeleteStatement)
                 {
@@ -155,10 +120,58 @@ namespace ScriptDomBlogSample
                     {
                         ParsedNamedTableReference(target, container);
                     }
+                    if (deleteSpec.WhereClause != null)
+                    {
+                        ParseWhereClause(deleteSpec.WhereClause, container);
+                    }
                 }
             }
             //end parser code
             return container;
+        }
+
+        private void ParseQueryExpression(QuerySpecification querySpec, DataContainer container)
+        {
+            if (querySpec.FromClause == null)
+            {
+                return;
+            }
+            var tables = querySpec.FromClause.TableReferences;
+            foreach (var table in tables)
+            {
+                if (table is NamedTableReference)
+                {
+                    ParsedNamedTableReference(table, container);
+                }
+            }
+            var columns = querySpec.SelectElements;
+            foreach (var column in columns)
+            {
+                if (column is SelectStarExpression)
+                {
+                    continue;
+                }
+                if (column is SelectScalarExpression)
+                {
+                    var scalar = column as SelectScalarExpression;
+                    var alias = scalar.ColumnName == null ? "" : scalar.ColumnName.Value;
+                    var expression = scalar.Expression;
+                    if (expression is ColumnReferenceExpression)
+                    {
+                        var columnExpression = expression as ColumnReferenceExpression;
+                        ParseColumnReferenceExpression(columnExpression, container, alias);
+                    }
+                    else if (expression is FunctionCall)
+                    {
+                        var functionExpression = expression as FunctionCall;
+                        ParseFunctionCall(functionExpression, container, alias);
+                    }
+                }
+            }
+            if (querySpec.WhereClause != null)
+            {
+                ParseWhereClause(querySpec.WhereClause, container);
+            }
         }
 
         private void ParseFunctionCall(FunctionCall functionExpression, DataContainer container, string alias)
@@ -271,6 +284,16 @@ namespace ScriptDomBlogSample
             {
                 ParseScalarExpression(scalarExpression, container);
             }
+            if (predicate.Subquery != null)
+            {
+                ParseScalarSubquery(predicate.Subquery, container);
+            }
+        }
+
+        private void ParseScalarSubquery(ScalarSubquery subquery, DataContainer container)
+        {
+            var expression = subquery.QueryExpression as QuerySpecification;
+            ParseQueryExpression(expression, container);
         }
 
         private void ParseBooleanIsNullExpression(BooleanIsNullExpression expression, DataContainer container)
@@ -359,6 +382,10 @@ namespace ScriptDomBlogSample
             if (expression is ColumnReferenceExpression)
             {
                 ParseColumnReferenceExpression(expression as ColumnReferenceExpression, container, "");
+            }
+            else if (expression is ScalarSubquery)
+            {
+                ParseScalarSubquery(expression as ScalarSubquery, container);
             }
         }
     }
