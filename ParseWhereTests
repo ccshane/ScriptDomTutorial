@@ -1,4 +1,3 @@
-using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ScriptDomBlogSample;
 
@@ -227,6 +226,145 @@ namespace ScriptDomTests
             var columns = result.GetColumns();
             Assert.AreEqual(1, columns.Count, "Column counts don't match");
             Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseSimpleInSubqueryWherClauseAddsTablesAndColumns()
+        {
+            const string sql = "SELECT column0 FROM table0 WHERE column1 IN (SELECT column2 FROM table1)";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(2, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table0", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table1", tables[1].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(3, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+            Assert.AreEqual("column2", columns[2].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseNestedInSubqueryWhereClauseAddsTablesAndColumns()
+        {
+            const string sql = "SELECT column0 FROM table0 WHERE column1 IN (SELECT column2 FROM table1 "+
+                " WHERE column3 IN (SELECT column4 FROM table2))";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(3, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table0", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table1", tables[1].Name, "Table names don't match");
+            Assert.AreEqual("table2", tables[2].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(5, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+            Assert.AreEqual("column2", columns[2].Name, "Column names don't match");
+            Assert.AreEqual("column3", columns[3].Name, "Column names don't match");
+            Assert.AreEqual("column4", columns[4].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseSimpleAssignSubqueryWherClauseAddsTablesAndColumns()
+        {
+            const string sql = "SELECT column0 FROM table0 WHERE column1 = (SELECT column2 FROM table1)";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(2, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table0", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table1", tables[1].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(3, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+            Assert.AreEqual("column2", columns[2].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseNestedAssignSubqueryWhereClauseAddsTablesAndColumns()
+        {
+            const string sql = "SELECT column0 FROM table0 WHERE column1 = (SELECT column2 FROM table1 " +
+                " WHERE column3 = (SELECT column4 FROM table2))";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(3, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table0", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table1", tables[1].Name, "Table names don't match");
+            Assert.AreEqual("table2", tables[2].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(5, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+            Assert.AreEqual("column2", columns[2].Name, "Column names don't match");
+            Assert.AreEqual("column3", columns[3].Name, "Column names don't match");
+            Assert.AreEqual("column4", columns[4].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseInSubqueryNestedAssignSubqueryWhereClauseAddsTablesAndColumns()
+        {
+            const string sql = "SELECT column0 FROM table0 WHERE column1 = (SELECT column2 FROM table1 " +
+                " WHERE column3 IN (SELECT column4 FROM table2))";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(3, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table0", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table1", tables[1].Name, "Table names don't match");
+            Assert.AreEqual("table2", tables[2].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(5, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+            Assert.AreEqual("column2", columns[2].Name, "Column names don't match");
+            Assert.AreEqual("column3", columns[3].Name, "Column names don't match");
+            Assert.AreEqual("column4", columns[4].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseAssignSubqueryNestedInSubqueryWhereClauseAddsTablesAndColumns()
+        {
+            const string sql = "SELECT column0 FROM table0 WHERE column1 IN (SELECT column2 FROM table1 " +
+                " WHERE column3 = (SELECT column4 FROM table2))";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(3, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table0", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table1", tables[1].Name, "Table names don't match");
+            Assert.AreEqual("table2", tables[2].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(5, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+            Assert.AreEqual("column2", columns[2].Name, "Column names don't match");
+            Assert.AreEqual("column3", columns[3].Name, "Column names don't match");
+            Assert.AreEqual("column4", columns[4].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseWhereClauseInDeleteAddsTablesAndColumns()
+        {
+            const string sql = "DELETE FROM table0 WHERE column0=5";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(1, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table0", tables[0].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(1, columns.Count);
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParseWhereClauseInUpdateAddsTablesAndColumns()
+        {
+            const string sql = "UPDATE table0 SEt column0=5 WHERE column1=6";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(1, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table0", tables[0].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(2, columns.Count);
+            Assert.AreEqual("column0", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
         }
     }
 }
