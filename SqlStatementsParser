@@ -125,6 +125,25 @@ namespace ScriptDomBlogSample
                         ParseWhereClause(deleteSpec.WhereClause, container);
                     }
                 }
+                else if (statement is ExecuteStatement)
+                {
+                    var execute = statement as ExecuteStatement;
+                    var executeSpec = execute.ExecuteSpecification;
+                    if (executeSpec.ExecutableEntity is ExecutableProcedureReference)
+                    {
+                        var entity = executeSpec.ExecutableEntity as ExecutableProcedureReference;
+                        var referenceName = entity.ProcedureReference;
+                        var procedure = referenceName.ProcedureReference;
+                        var name = procedure.Name;
+                        var storedProcName = name.BaseIdentifier.Value;
+                        container.AddTable(storedProcName, "");
+                    }
+                    var parameters = executeSpec.ExecutableEntity.Parameters;
+                    foreach (var executeParameter in parameters)
+                    {
+                        var value = executeParameter.ParameterValue;
+                    }
+                }
             }
             //end parser code
             return container;
