@@ -289,6 +289,72 @@ namespace ScriptDomTests
             Assert.AreEqual(1, columns.Count, "Column counts don't match");
             Assert.AreEqual("column_name", columns[0].Name);
         }
+
+        [TestMethod]
+        public void ParsingUnionSelectReturnsCorrectObject()
+        {
+            const string sql = "SELECT column1 FROM table1 UNION SELECT column1 FROM table2";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(2, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table1", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table2", tables[1].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(2, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column1", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("table1", columns[0].BelongsToTable, "Incorrect table reference");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParsingNestedUnionSelectReturnsCorrectObject()
+        {
+            const string sql = "SELECT column1 FROM table1 UNION SELECT column1 FROM table2 UNION "+
+                "SELECT column1 FROM table3";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(3, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table1", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table2", tables[1].Name, "Table names don't match");
+            Assert.AreEqual("table3", tables[2].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(2, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column1", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("table1", columns[0].BelongsToTable, "Incorrect table reference");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParsingIntersectSelectReturnsCorrectObject()
+        {
+            const string sql = "SELECT column1 FROM table1 INTERSECT SELECT column1 FROM table2";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(2, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table1", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table2", tables[1].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(2, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column1", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("table1", columns[0].BelongsToTable, "Incorrect table reference");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParsingExceptSelectReturnsCorrectObject()
+        {
+            const string sql = "SELECT column1 FROM table1 EXCEPT SELECT column1 FROM table2";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(2, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table1", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table2", tables[1].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(2, columns.Count, "Column counts don't match");
+            Assert.AreEqual("column1", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("table1", columns[0].BelongsToTable, "Incorrect table reference");
+            Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
+        }
     }
 }
 
