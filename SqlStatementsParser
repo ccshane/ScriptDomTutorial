@@ -33,36 +33,18 @@ namespace ScriptDomBlogSample
                     if (into != null)
                     {
                         var table = into.BaseIdentifier.Value;
-                        container.AddTable(table,"");
+                        container.AddTable(table, "");
                     }
-                    var querySpec = select.QueryExpression as QuerySpecification;
-                    if (querySpec == null)
+                    if (select.QueryExpression is QuerySpecification)
                     {
-                        //nothing to do
-                        continue;
+                        var querySpec = select.QueryExpression as QuerySpecification;
+                        ParseQuerySpecification(querySpec, container);
                     }
-                    //check for distinct
-                    container.IsDistinctSelection = querySpec.UniqueRowFilter.ToString().ToUpper().Equals("DISTINCT");
-                    if (querySpec.TopRowFilter != null)
+                    else if (select.QueryExpression is BinaryQueryExpression)
                     {
-                        //check for top
-                        container.IsTopSelection = true;
-                        container.IsTopPercent = querySpec.TopRowFilter.Percent;
-                        ScalarExpression expression;
-                        if (querySpec.TopRowFilter.Expression is ParenthesisExpression)
-                        {
-                            expression = (querySpec.TopRowFilter.Expression as ParenthesisExpression).Expression;
-                        }
-                        else
-                        {
-                            expression = querySpec.TopRowFilter.Expression;
-                        }
-                        if (expression is IntegerLiteral)
-                        {
-                            container.TopCount = Int32.Parse((expression as IntegerLiteral).Value);
-                        }
+                        var binaryQuery = select.QueryExpression as BinaryQueryExpression;
+                        ParseBinaryQueryExpression(binaryQuery, container);
                     }
-                    ParseQueryExpression(querySpec, container);
                 }
                 else if (statement is InsertStatement)
                 {
@@ -92,7 +74,7 @@ namespace ScriptDomBlogSample
                         if (setClause is AssignmentSetClause)
                         {
                             var assignment = setClause as AssignmentSetClause;
-                            ParseColumnReferenceExpression(assignment.Column,container,"");
+                            ParseColumnReferenceExpression(assignment.Column, container, "");
                         }
                     }
                     if (updateSpec.WhereClause != null)
@@ -110,7 +92,7 @@ namespace ScriptDomBlogSample
                         container.IsTopSelection = true;
                         container.IsTopPercent = deleteSpec.TopRowFilter.Percent;
                         var expression = deleteSpec.TopRowFilter.Expression as ParenthesisExpression;
-                        if (expression!=null && expression.Expression is IntegerLiteral)
+                        if (expression != null && expression.Expression is IntegerLiteral)
                         {
                             container.TopCount = Int32.Parse((expression.Expression as IntegerLiteral).Value);
                         }
@@ -147,6 +129,54 @@ namespace ScriptDomBlogSample
             }
             //end parser code
             return container;
+        }
+
+        private void ParseBinaryQueryExpression(BinaryQueryExpression binaryQuery, DataContainer container)
+        {
+            var first = binaryQuery.FirstQueryExpression;
+            if (first is QuerySpecification)
+            {
+                ParseQuerySpecification(first as QuerySpecification, container);
+            }
+            else if (first is BinaryQueryExpression)
+            {
+                ParseBinaryQueryExpression(first as BinaryQueryExpression, container);
+            }
+            var second = binaryQuery.SecondQueryExpression;
+            if (second is QuerySpecification)
+            {
+                ParseQuerySpecification(second as QuerySpecification, container);
+            }
+            else if (second is BinaryQueryExpression)
+            {
+                ParseBinaryQueryExpression(second as BinaryQueryExpression, container);
+            }
+        }
+
+        private void ParseQuerySpecification(QuerySpecification querySpec, DataContainer container)
+        {
+            //check for distinct
+            container.IsDistinctSelection = querySpec.UniqueRowFilter.ToString().ToUpper().Equals("DISTINCT");
+            if (querySpec.TopRowFilter != null)
+            {
+                //check for top
+                container.IsTopSelection = true;
+                container.IsTopPercent = querySpec.TopRowFilter.Percent;
+                ScalarExpression expression;
+                if (querySpec.TopRowFilter.Expression is ParenthesisExpression)
+                {
+                    expression = (querySpec.TopRowFilter.Expression as ParenthesisExpression).Expression;
+                }
+                else
+                {
+                    expression = querySpec.TopRowFilter.Expression;
+                }
+                if (expression is IntegerLiteral)
+                {
+                    container.TopCount = Int32.Parse((expression as IntegerLiteral).Value);
+                }
+            }
+            ParseQueryExpression(querySpec, container);
         }
 
         private void ParseQueryExpression(QuerySpecification querySpec, DataContainer container)
@@ -238,8 +268,8 @@ namespace ScriptDomBlogSample
             {
                 var tableRef = identifier.Identifiers.First().Value;
                 var tableName = (from x in container.GetTables()
-                    where (x.Name.Equals(tableRef) || x.Alias.Equals(tableRef))
-                    select x).First().Name;
+                                 where (x.Name.Equals(tableRef) || x.Alias.Equals(tableRef))
+                                 select x).First().Name;
                 var columnName = identifier.Identifiers.Skip(1).First().Value;
                 container.AddColumn(columnName, alias, tableName);
             }
@@ -289,7 +319,7 @@ namespace ScriptDomBlogSample
         private void ParseLikePredicate(LikePredicate predicate, DataContainer container)
         {
             var initial = predicate.FirstExpression;
-            ParseScalarExpression(initial,container);
+            ParseScalarExpression(initial, container);
             var compareTo = predicate.SecondExpression;
             ParseScalarExpression(compareTo, container);
             var escape = predicate.EscapeExpression;
@@ -333,14 +363,14 @@ namespace ScriptDomBlogSample
             var initial = expression.FirstExpression;
             ParseScalarExpression(initial, container);
             var lower = expression.SecondExpression;
-            ParseScalarExpression(lower,container);
+            ParseScalarExpression(lower, container);
             var higher = expression.ThirdExpression;
-            ParseScalarExpression(higher,container);
+            ParseScalarExpression(higher, container);
         }
 
         private void ParseBooleanNotExpression(BooleanNotExpression expression, DataContainer container)
         {
-            ParseBooleanExpression(expression.Expression,container);
+            ParseBooleanExpression(expression.Expression, container);
         }
 
         private void ParseBooleanParenthesisExpression(BooleanParenthesisExpression expression, DataContainer container)
