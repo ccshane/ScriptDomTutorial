@@ -192,6 +192,19 @@ namespace ScriptDomBlogSample
                 {
                     ParsedNamedTableReference(table, container);
                 }
+                else if (table is QualifiedJoin)
+                {
+                    var join = table as QualifiedJoin;
+                    if (join.FirstTableReference is NamedTableReference)
+                    {
+                        ParsedNamedTableReference(join.FirstTableReference as NamedTableReference, container);
+                    }
+                    if (join.SecondTableReference is NamedTableReference)
+                    {
+                        ParsedNamedTableReference(join.SecondTableReference as NamedTableReference, container);
+                    }
+                    ParseBooleanExpression(join.SearchCondition, container);
+                }
             }
             var columns = querySpec.SelectElements;
             foreach (var column in columns)
@@ -267,7 +280,7 @@ namespace ScriptDomBlogSample
             else
             {
                 var tableRef = identifier.Identifiers.First().Value;
-                var tableName = (from x in container.GetTables()
+                string tableName = (from x in container.GetTables()
                                  where (x.Name.Equals(tableRef) || x.Alias.Equals(tableRef))
                                  select x).First().Name;
                 var columnName = identifier.Identifiers.Skip(1).First().Value;
