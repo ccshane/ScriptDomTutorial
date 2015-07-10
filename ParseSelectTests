@@ -355,6 +355,59 @@ namespace ScriptDomTests
             Assert.AreEqual("table1", columns[0].BelongsToTable, "Incorrect table reference");
             Assert.AreEqual("column1", columns[1].Name, "Column names don't match");
         }
+
+        [TestMethod]
+        public void ParsingSimpleJoinReturnsCorrectObject()
+        {
+            const string sql = "SELECT column1 FROM table1 JOIN table2 ON table1.id=table2.id";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(2, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table1", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table2", tables[1].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(3, columns.Count, "Column counts don't match");
+            Assert.AreEqual("id", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("table1", columns[0].BelongsToTable, "Incorrect table reference");
+            Assert.AreEqual("id", columns[1].Name, "Column names don't match");
+            Assert.AreEqual("column1", columns[2].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParsingLeftJoinReturnsCorrectObject()
+        {
+            const string sql = "SELECT column1 FROM table1 LEFT JOIN table2 ON table1.id=table2.id";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(2, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table1", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table2", tables[1].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(3, columns.Count, "Column counts don't match");
+            Assert.AreEqual("id", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("table1", columns[0].BelongsToTable, "Incorrect table reference");
+            Assert.AreEqual("id", columns[1].Name, "Column names don't match");
+            Assert.AreEqual("table2", columns[1].BelongsToTable, "Incorrect table reference");
+            Assert.AreEqual("column1", columns[2].Name, "Column names don't match");
+        }
+
+        [TestMethod]
+        public void ParsingSimpleJoinWithAliasesReturnsCorrectObject()
+        {
+            const string sql = "SELECT column1 FROM table1 t1 JOIN table2 t2 ON t1.id=t2.id";
+            var result = _parser.Parse(sql);
+            var tables = result.GetTables();
+            Assert.AreEqual(2, tables.Count, "Table counts don't match");
+            Assert.AreEqual("table1", tables[0].Name, "Table names don't match");
+            Assert.AreEqual("table2", tables[1].Name, "Table names don't match");
+            var columns = result.GetColumns();
+            Assert.AreEqual(3, columns.Count, "Column counts don't match");
+            Assert.AreEqual("id", columns[0].Name, "Column names don't match");
+            Assert.AreEqual("table1", columns[0].BelongsToTable, "Incorrect table reference");
+            Assert.AreEqual("id", columns[1].Name, "Column names don't match");
+            Assert.AreEqual("table2", columns[1].BelongsToTable, "Incorrect table reference");
+            Assert.AreEqual("column1", columns[2].Name, "Column names don't match");
+        }
     }
 }
 
