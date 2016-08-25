@@ -1,7 +1,7 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ScriptDomBlogSample;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ScriptDomDemo;
 
-namespace ScriptDomTests
+namespace ScriptDomBlogSampleTests
 {
     [TestClass]
     public class ParseInsertTests
